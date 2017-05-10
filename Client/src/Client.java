@@ -23,6 +23,7 @@ public class Client {
             socket = new Socket(HOSTNAME, PORT);
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getOutputStream());
+            System.out.println("\nConnected to: " + socket);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -32,7 +33,13 @@ public class Client {
 
     public void sendTest() {
         try {
-            outputStream.writeUTF("test");
+            String messageOut = "test";
+            outputStream.writeUTF(messageOut);
+            outputStream.flush();
+            System.out.println("\nOut to: " + socket + "\n" + messageOut);
+
+            String messageIn = inputStream.readUTF();
+            System.out.println("\nIn from: " + socket + "\n" + messageIn);
         } catch (IOException e) {
             e.printStackTrace();
         }

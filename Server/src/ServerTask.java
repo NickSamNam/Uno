@@ -27,7 +27,13 @@ public class ServerTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                System.out.println(socket + "\t" + inputStream.readUTF());
+                String messageIn = inputStream.readUTF();
+                System.out.println("\nIn from: " + socket + "\n" + messageIn);
+                if (!messageIn.equals("test"))
+                    break;
+                String messageOut = "hoi patrick!";
+                outputStream.writeUTF(messageOut);
+                System.out.println("\nOut to: " + socket + "\n" + messageOut);
             } catch (EOFException | SocketException e) {
                 break;
             } catch (IOException e) {
@@ -37,7 +43,7 @@ public class ServerTask implements Runnable {
                     inputStream.close();
                     outputStream.close();
                     socket.close();
-                    System.out.println("Client disconnected: " + socket.toString());
+                    System.out.println("\nClient disconnected: " + socket.toString());
                     return;
                 } catch (IOException e) {
                     e.printStackTrace();
