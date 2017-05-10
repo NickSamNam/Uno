@@ -10,40 +10,41 @@ import java.net.SocketException;
  */
 public class ServerTask implements Runnable {
     private Socket socket;
-    DataInputStream inputStream;
-    DataOutputStream outputStream;
+    private DataInputStream inputStream = null;
+    private DataOutputStream outputStream = null;
 
     public ServerTask(Socket socket) {
-        this.socket = socket;
+        try {
+            this.socket = socket;
+            inputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
-        try {
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
-
-            while (true) {
-                try {
-                    System.out.println(socket + "\t" + inputStream.readUTF());
-                } catch (EOFException | SocketException e) {
-                    break;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        while (true) {
             try {
-                inputStream.close();
-                outputStream.close();
-                socket.close();
-                System.out.println("Client disconnected: " + socket.toString());
+                System.out.println(socket + "\t" + inputStream.readUTF());
+            } catch (EOFException | SocketException e) {
+                break;
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    inputStream.close();
+                    outputStream.close();
+                    socket.close();
+                    System.out.println("Client disconnected: " + socket.toString());
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    return;
+                }
             }
         }
     }
-
 }

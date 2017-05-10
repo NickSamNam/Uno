@@ -10,7 +10,7 @@ import java.net.SocketException;
 /**
  * Created by snick on 8-5-2017.
  */
-public class Server implements Runnable {
+public class Server {
     public static void main(String[] args) {
         new Server();
     }
@@ -23,24 +23,21 @@ public class Server implements Runnable {
         try {
             serverSocket = new ServerSocket(PORT, 0, InetAddress.getByName(HOSTNAME));
             System.out.println("Server running: " + serverSocket.toString());
+            while (true) {
+                connectClient();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void connectClient() {
-        try(Socket socket = serverSocket.accept()) {
-            System.out.println("Client connected: " + socket.toString());
+        try {
+            Socket socket = serverSocket.accept();
+            System.out.println("\nClient connected: " + socket.toString());
             new Thread(new ServerTask(socket)).start();
         } catch (IOException e) {
             System.out.println("Can't connect client: " +  e.getMessage());
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            connectClient();
         }
     }
 }
