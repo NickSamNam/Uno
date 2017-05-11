@@ -12,7 +12,7 @@ public class Client {
         new Client().sendTest();
     }
 
-    public final static String HOSTNAME = "networkprogramming.aftersoft.nl";
+    public final static String HOSTNAME = "server.aftersoft.nl";
     public final static int PORT = 8080;
     private Socket socket;
     private DataInputStream inputStream = null;
