@@ -1,23 +1,26 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import java.awt.Point;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by snick on 10-5-2017.
  */
 public class ServerTask implements Runnable {
     private Socket socket;
-    private DataInputStream inputStream = null;
-    private DataOutputStream outputStream = null;
+    private ObjectInputStream objectInputStream = null;
+    private ObjectOutputStream objectOutputStream = null;
+    private DataOutputStream dataOutputStream = null;
 
     public ServerTask(Socket socket) {
         try {
             this.socket = socket;
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            dataOutputStream = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -27,21 +30,26 @@ public class ServerTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                String messageIn = inputStream.readUTF();
-                System.out.println("\nIn from: " + socket + "\n" + messageIn);
-                if (!messageIn.equals("test"))
-                    break;
-                String messageOut = "hoi patrick!";
-                outputStream.writeUTF(messageOut);
-                System.out.println("\nOut to: " + socket + "\n" + messageOut);
+                List<Point> accessiblePoints = (List<Point>) objectInputStream.readObject();
+                Point target = (Point) objectInputStream.readObject();
+                List<Point> sources = (List<Point>) objectInputStream.readObject();
+
+                float startTime = System.nanoTime();
+                BreadthFirstSearch bfs = new BreadthFirstSearch(accessiblePoints, target);
+                Map<Point, List<Point>> paths = bfs.findPaths(sources);
+                float endTime = System.nanoTime();
+
+                dataOutputStream.writeFloat((endTime-startTime)*1000000000);
+                objectOutputStream.writeObject(paths);
             } catch (EOFException | SocketException e) {
                 break;
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 try {
-                    inputStream.close();
-                    outputStream.close();
+                    objectInputStream.close();
+                    objectOutputStream.close();
+                    dataOutputStream.close();
                     socket.close();
                     System.out.println("\nClient disconnected: " + socket.toString());
                     return;
