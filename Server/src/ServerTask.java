@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,10 @@ public class ServerTask implements Runnable {
 
                 float startTime = System.nanoTime();
                 BreadthFirstSearch bfs = new BreadthFirstSearch(accessiblePoints, target);
-                Map<Point, List<Point>> paths = bfs.findPaths(sources);
+                Map<Point, List<Point>> paths = new HashMap<>(sources.size());
+                for (Point source : sources) {
+                    paths.put(source, bfs.findPath(source));
+                }
                 float endTime = System.nanoTime();
 
                 dataOutputStream.writeFloat((endTime-startTime)*1000000000);
