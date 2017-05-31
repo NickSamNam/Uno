@@ -20,7 +20,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
         new Client();
     }
 
-    public final static String HOSTNAME = "localhost";
+    public final static String HOSTNAME = "server.aftersoft.nl";
     public final static int PORT = 8080;
     private Socket socket;
     private ObjectInputStream objectInputStream = null;

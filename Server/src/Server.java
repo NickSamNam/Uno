@@ -15,7 +15,6 @@ public class Server {
         new Server();
     }
 
-    public final static String HOSTNAME = "192.168.1.50";
     public final static int PORT = 8080;
     ServerSocket serverSocket;
 
