@@ -3,6 +3,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +13,14 @@ import java.util.Map;
  */
 public class Client implements GUI.OnDataSubmissionListener, WindowListener {
     private GUI gui;
+    private Thread dataReceiver;
+    private boolean receive = true;
+
     public static void main(String[] args) {
         new Client();
     }
 
-    public final static String HOSTNAME = "server.aftersoft.nl";
+    public final static String HOSTNAME = "localhost";
     public final static int PORT = 8080;
     private Socket socket;
     private ObjectInputStream objectInputStream = null;
@@ -31,7 +35,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
             objectInputStream = new ObjectInputStream(socket.getInputStream());
             dataInputStream = new DataInputStream(socket.getInputStream());
             System.out.println("\nConnected to: " + socket);
-            new Thread(new DataReceiver()).start();
+            (dataReceiver = new Thread(new DataReceiver())).start();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -71,6 +75,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
+        receive = false;
         try {
             dataInputStream.close();
             objectOutputStream.close();
@@ -111,11 +116,13 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
     private class DataReceiver implements Runnable {
         @Override
         public void run() {
-            while (true) {
+            while (receive) {
                 try {
                     float calcTime = dataInputStream.readFloat();
                     Map<Point, List<Point>> paths = (Map<Point, List<Point>>) objectInputStream.readObject();
                     gui.processData(calcTime, paths);
+                } catch (EOFException | SocketException e) {
+                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {

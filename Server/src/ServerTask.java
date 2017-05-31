@@ -30,20 +30,22 @@ public class ServerTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                List<Point> accessiblePoints = (List<Point>) objectInputStream.readObject();
-                List<Point> sources = (List<Point>) objectInputStream.readObject();
-                Point target = (Point) objectInputStream.readObject();
+                while (true) {
+                    List<Point> accessiblePoints = (List<Point>) objectInputStream.readObject();
+                    List<Point> sources = (List<Point>) objectInputStream.readObject();
+                    Point target = (Point) objectInputStream.readObject();
 
-                float startTime = System.nanoTime();
-                BreadthFirstSearch bfs = new BreadthFirstSearch(accessiblePoints, target);
-                Map<Point, List<Point>> paths = new HashMap<>(sources.size());
-                for (Point source : sources) {
-                    paths.put(source, bfs.findPath(source));
+                    float startTime = System.nanoTime();
+                    BreadthFirstSearch bfs = new BreadthFirstSearch(accessiblePoints, target);
+                    Map<Point, List<Point>> paths = new HashMap<>(sources.size());
+                    for (Point source : sources) {
+                        paths.put(source, bfs.findPath(source));
+                    }
+                    float endTime = System.nanoTime();
+
+                    dataOutputStream.writeFloat((endTime - startTime) * 1000000000);
+                    objectOutputStream.writeObject(paths);
                 }
-                float endTime = System.nanoTime();
-
-                dataOutputStream.writeFloat((endTime-startTime)*1000000000);
-                objectOutputStream.writeObject(paths);
             } catch (EOFException | SocketException e) {
                 break;
             } catch (IOException e) {
