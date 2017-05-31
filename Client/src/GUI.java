@@ -1,24 +1,21 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created by Eversdijk on 15-5-2017.
  */
 public class GUI extends JFrame {
 
-    public static void main(String[] args) {
-        new GUI();
-    }
+    private JPanel sourcesListPanel, left, grid;
+    private JScrollPane sourcesScrollPane;
+    private ArrayList<Point> sources = new ArrayList<>();
+    private ArrayList<ArrayList<JButton>> buttonList = new ArrayList<>();
+    private TextField XSourcesTF, YSourcesTF;
 
-    JPanel sourcesListPanel, left, grid;
-    JScrollPane sourcesScrollPane;
-    ArrayList<Point> sources = new ArrayList<>();
-    ArrayList<ArrayList<JButton>> buttonList = new ArrayList<>();
-    TextField XSourcesTF, YSourcesTF;
-
-    public GUI() {
+    public GUI(OnDataSubmissionListener submissionListener, WindowListener windowListener) {
         super("Pathfinder");
         Dimension screenSize = (Toolkit.getDefaultToolkit().getScreenSize());
         double screenWidth = screenSize.getWidth();
@@ -27,8 +24,8 @@ public class GUI extends JFrame {
         setMinimumSize(new Dimension((int) screenWidth / 2, (int) screenHeight / 2));
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(windowListener);
 
         JPanel content = new JPanel(new BorderLayout());
         add(content);
@@ -115,7 +112,7 @@ public class GUI extends JFrame {
         submit.addActionListener(e -> {
             ArrayList<Point> accessiblePoints = new ArrayList<>();
             ArrayList<Point> sources = new ArrayList<>();
-            Point target;
+            Point target = null;
             for(int y = 0; y < buttonList.size(); y++){
                 for(int x = 0; x < buttonList.get(y).size(); x++){
                     JButton button = buttonList.get(y).get(x);
@@ -131,7 +128,7 @@ public class GUI extends JFrame {
                     }
                 }
             }
-
+        submissionListener.sendData(accessiblePoints, sources, target);
         });
 
         left.add(instructionsPanel);
@@ -148,7 +145,7 @@ public class GUI extends JFrame {
         setVisible(true);
     }
 
-    public JPanel makeGrid(int x, int y) {
+    private JPanel makeGrid(int x, int y) {
         JPanel newGrid = new JPanel(new GridLayout(y, x));
         buttonList.clear();
         for (int i = 0; i < y; i++) {
@@ -197,5 +194,14 @@ public class GUI extends JFrame {
             buttonList.add(buttons);
         }
         return newGrid;
+    }
+
+    public interface OnDataSubmissionListener {
+        void sendData(List<Point> accessiblePoints, List<Point> sources, Point target);
+    }
+
+    public void processData(float calcTime, Map<Point, List<Point>> paths) {
+        System.out.println("Calculation time: " + calcTime + "s");
+        System.out.println(paths);
     }
 }

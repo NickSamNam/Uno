@@ -2,7 +2,6 @@ import java.awt.Point;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,8 @@ public class ServerTask implements Runnable {
         while (true) {
             try {
                 List<Point> accessiblePoints = (List<Point>) objectInputStream.readObject();
-                Point target = (Point) objectInputStream.readObject();
                 List<Point> sources = (List<Point>) objectInputStream.readObject();
+                Point target = (Point) objectInputStream.readObject();
 
                 float startTime = System.nanoTime();
                 BreadthFirstSearch bfs = new BreadthFirstSearch(accessiblePoints, target);
