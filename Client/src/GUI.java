@@ -44,10 +44,12 @@ public class GUI extends JFrame {
         JButton gridButton = new JButton("Set grid size");
         gridButton.addActionListener(e -> {
             content.remove(grid);
-            if(isValid(XGridTF.getText()) && isValid(YGridTF.getText())){
+            if (isValid(XGridTF.getText()) && isValid(YGridTF.getText())) {
                 grid = makeGrid(Integer.parseInt(XGridTF.getText()), Integer.parseInt(YGridTF.getText()));
                 content.add(grid, BorderLayout.CENTER);
-                setVisible(true);}});
+                setVisible(true);
+            }
+        });
 
         gridInput.add(XGridLabel);
         gridInput.add(XGridTF);
@@ -63,27 +65,35 @@ public class GUI extends JFrame {
         JPanel selectionPanel = new JPanel(new GridLayout(3, 2));
 
         JButton selectAll = new JButton("Select all");
-        selectAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
-            for (JButton b : buttons) {
-                b.setBackground(Color.green);
-            }
-        }});
-        JButton deselectAll = new JButton("Deselect all");
-        deselectAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
-            for (JButton b : buttons) {
-                b.setBackground(null);
-            }
-        }});
-        JButton inverseAll = new JButton("Inverse all");
-        inverseAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
-            for (JButton b : buttons) {
-
-                if(b.getBackground() == Color.green)
-                    b.setBackground(null);
-                else if(b.getBackground() != Color.blue && b.getBackground() != Color.red)
+        selectAll.addActionListener(e -> {
+            for (ArrayList<JButton> buttons : buttonList) {
+                for (JButton b : buttons) {
+                    target = null;
                     b.setBackground(Color.green);
+                }
             }
-        }});
+        });
+        JButton deselectAll = new JButton("Deselect all");
+        deselectAll.addActionListener(e -> {
+            for (ArrayList<JButton> buttons : buttonList) {
+                for (JButton b : buttons) {
+                    b.setBackground(null);
+                    target = null;
+                }
+            }
+        });
+        JButton inverseAll = new JButton("Inverse all");
+        inverseAll.addActionListener(e -> {
+            for (ArrayList<JButton> buttons : buttonList) {
+                for (JButton b : buttons) {
+
+                    if (b.getBackground() == Color.green)
+                        b.setBackground(null);
+                    else if (b.getBackground() != Color.blue && b.getBackground() != Color.red)
+                        b.setBackground(Color.green);
+                }
+            }
+        });
 
         selectionPanel.add(new JPanel());
         selectionPanel.add(selectAll);
@@ -116,23 +126,26 @@ public class GUI extends JFrame {
 
         JButton submit = new JButton("Submit");
         submit.addActionListener(e -> {
-            ArrayList<Point> accessiblePoints = new ArrayList<>();
-            sources = new ArrayList<>();
-            for(int y = 0; y < buttonList.size(); y++){
-                for(int x = 0; x < buttonList.get(y).size(); x++){
-                    JButton button = buttonList.get(y).get(x);
-                    if(button.getBackground() == Color.green){
-                        accessiblePoints.add(new Point(x,y));
-                    } else if(button.getBackground() == Color.blue){
-                        accessiblePoints.add(new Point(x,y));
-                        sources.add(new Point(x,y));
-                    }
-                    else if(button.getBackground() == Color.red){
-                        accessiblePoints.add(new Point(x, y));
+            if (target != null) {
+                ArrayList<Point> accessiblePoints = new ArrayList<>();
+                sources = new ArrayList<>();
+                for (int y = 0; y < buttonList.size(); y++) {
+                    for (int x = 0; x < buttonList.get(y).size(); x++) {
+                        JButton button = buttonList.get(y).get(x);
+                        if (button.getBackground() == Color.green || button.getBackground() == Color.yellow) {
+                            accessiblePoints.add(new Point(x, y));
+                        } else if (button.getBackground() == Color.blue) {
+                            accessiblePoints.add(new Point(x, y));
+                            sources.add(new Point(x, y));
+                        } else if (button.getBackground() == Color.red) {
+                            accessiblePoints.add(new Point(x, y));
+                        }
                     }
                 }
+                submissionListener.sendData(accessiblePoints, sources, target);
+            } else {
+                errorMessage.setText("there is no target.");
             }
-            submissionListener.sendData(accessiblePoints, sources, target);
         });
 
         left.add(instructionsPanel);
@@ -161,16 +174,18 @@ public class GUI extends JFrame {
                 button.addMouseListener(new MouseListener() {
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        if(e.isControlDown()){
+                        if (e.isControlDown()) {
                             button.setBackground(null);
-                        }else if(e.isShiftDown()){
+                        } else if (e.isShiftDown()) {
                             button.setBackground(Color.green);
-                        }else if(e.getButton() == MouseEvent.BUTTON3){
-                            if(target != null) {
-                                buttonList.get(target.y).get(target.x).setBackground(Color.green);}
+                        } else if (e.getButton() == MouseEvent.BUTTON3) {
+                            if (target != null) {
+                                buttonList.get(target.y).get(target.x).setBackground(Color.green);
+                            }
                             button.setBackground(Color.red);
-                            target = new Point(xx,yy);
-                        }else{ button.setBackground(Color.blue);
+                            target = new Point(xx, yy);
+                        } else {
+                            button.setBackground(Color.blue);
                         }
                     }
 
@@ -185,9 +200,9 @@ public class GUI extends JFrame {
 
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if(e.isControlDown()){
+                        if (e.isControlDown()) {
                             button.setBackground(null);
-                        } else if(e.isShiftDown()){
+                        } else if (e.isShiftDown()) {
                             button.setBackground(Color.green);
                         }
                     }
@@ -211,10 +226,11 @@ public class GUI extends JFrame {
 
     public void processData(float calcTime, Map<Point, List<Point>> paths) {
         System.out.println("Calculation time: " + calcTime + "s");
-        for (Point mapP: sources) {
-            for (Point p: paths.get(mapP)) {
-                JButton  b = buttonList.get(p.y).get(p.x);
-                if(b.getBackground() == Color.green)
+        resetPaths();
+        for (Point mapP : sources) {
+            for (Point p : paths.get(mapP)) {
+                JButton b = buttonList.get(p.y).get(p.x);
+                if (b.getBackground() == Color.green)
                     b.setBackground(Color.yellow);
             }
         }
@@ -237,5 +253,15 @@ public class GUI extends JFrame {
         }
         setVisible(true);
         return valid;
+    }
+
+    private void resetPaths() {
+        for (int i = 0; i < buttonList.size(); i++) {
+            ArrayList<JButton> buttons = buttonList.get(i);
+            for (int j = 0; j < buttons.size(); j++) {
+                if (buttons.get(j).getBackground() == Color.yellow)
+                    buttons.get(j).setBackground(Color.green);
+            }
+        }
     }
 }
