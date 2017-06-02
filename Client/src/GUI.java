@@ -214,7 +214,7 @@ public class GUI extends JFrame {
             ArrayList<JButton> buttons = buttonList.get(y);
             for (int x = 0; x < buttons.size(); x++) {
                 if ( buttons.get(x).getBackground() == Color.green)
-                buttons.get(x).setBackground(Color.YELLOW);
+                buttons.get(x).setBackground(Color.yellow);
             }
         }
         System.out.println(paths);
