@@ -3,7 +3,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -20,7 +19,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
         new Client();
     }
 
-    public final static String HOSTNAME = "localhost";
+    public final static String HOSTNAME = "server.aftersoft.com";
     public final static int PORT = 8080;
     private Socket socket;
     private ObjectInputStream objectInputStream = null;
@@ -33,19 +32,19 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
         new Thread(new DataReceiver()).start();
     }
 
-    public void sendTest() {
-        try {
-            String messageOut = "test";
-            objectOutputStream.writeUTF(messageOut);
-            objectOutputStream.flush();
-            System.out.println("\nOut to: " + socket + "\n" + messageOut);
-
-            String messageIn = objectInputStream.readUTF();
-            System.out.println("\nIn from: " + socket + "\n" + messageIn);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void sendTest() {
+//        try {
+//            String messageOut = "test";
+//            objectOutputStream.writeUTF(messageOut);
+//            objectOutputStream.flush();
+//            System.out.println("\nOut to: " + socket + "\n" + messageOut);
+//
+//            String messageIn = objectInputStream.readUTF();
+//            System.out.println("\nIn from: " + socket + "\n" + messageIn);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void connect() {
         try {
