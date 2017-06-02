@@ -156,8 +156,8 @@ public class GUI extends JFrame {
             ArrayList<JButton> buttons = new ArrayList<>();
             for (int j = 0; j < x; j++) {
                 JButton button = new JButton("" + (j) + "," + (i));
-                final int yy = j;
-                final int xx = i;
+                final int yy = i;
+                final int xx = j;
                 button.addMouseListener(new MouseListener() {
                     @Override
                     public void mouseReleased(MouseEvent e) {
@@ -167,7 +167,7 @@ public class GUI extends JFrame {
                             button.setBackground(Color.green);
                         }else if(e.getButton() == MouseEvent.BUTTON3){
                             if(target != null) {
-                                buttonList.get(target.x).get(target.y).setBackground(Color.green);}
+                                buttonList.get(target.y).get(target.x).setBackground(Color.green);}
                             button.setBackground(Color.red);
                             target = new Point(xx,yy);
                         }else{ button.setBackground(Color.blue);
@@ -213,7 +213,7 @@ public class GUI extends JFrame {
         System.out.println("Calculation time: " + calcTime + "s");
         for (Point mapP: sources) {
             for (Point p: paths.get(mapP)) {
-                JButton  b = buttonList.get(p.x).get(p.y);
+                JButton  b = buttonList.get(p.y).get(p.x);
                 if(b.getBackground() == Color.green)
                     b.setBackground(Color.yellow);
             }
