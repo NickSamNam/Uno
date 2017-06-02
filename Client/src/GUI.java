@@ -13,6 +13,7 @@ public class GUI extends JFrame {
     private ArrayList<ArrayList<JButton>> buttonList = new ArrayList<>();
     private Point target = null;
     private JLabel errorMessage = new JLabel();
+    private ArrayList<Point> sources;
 
     public GUI(OnDataSubmissionListener submissionListener, WindowListener windowListener) {
         super("Pathfinder");
@@ -44,9 +45,9 @@ public class GUI extends JFrame {
         gridButton.addActionListener(e -> {
             content.remove(grid);
             if(isValid(XGridTF.getText()) && isValid(YGridTF.getText())){
-            grid = makeGrid(Integer.parseInt(XGridTF.getText()), Integer.parseInt(YGridTF.getText()));
-            content.add(grid, BorderLayout.CENTER);
-            setVisible(true);}});
+                grid = makeGrid(Integer.parseInt(XGridTF.getText()), Integer.parseInt(YGridTF.getText()));
+                content.add(grid, BorderLayout.CENTER);
+                setVisible(true);}});
 
         gridInput.add(XGridLabel);
         gridInput.add(XGridTF);
@@ -78,7 +79,7 @@ public class GUI extends JFrame {
             for (JButton b : buttons) {
 
                 if(b.getBackground() == Color.green)
-                b.setBackground(null);
+                    b.setBackground(null);
                 else if(b.getBackground() != Color.blue && b.getBackground() != Color.red)
                     b.setBackground(Color.green);
             }
@@ -116,7 +117,7 @@ public class GUI extends JFrame {
         JButton submit = new JButton("Submit");
         submit.addActionListener(e -> {
             ArrayList<Point> accessiblePoints = new ArrayList<>();
-            ArrayList<Point> sources = new ArrayList<>();
+            sources = new ArrayList<>();
             for(int y = 0; y < buttonList.size(); y++){
                 for(int x = 0; x < buttonList.get(y).size(); x++){
                     JButton button = buttonList.get(y).get(x);
@@ -127,11 +128,11 @@ public class GUI extends JFrame {
                         sources.add(new Point(x,y));
                     }
                     else if(button.getBackground() == Color.red){
-                            accessiblePoints.add(new Point(x, y));
+                        accessiblePoints.add(new Point(x, y));
                     }
                 }
             }
-        submissionListener.sendData(accessiblePoints, sources, target);
+            submissionListener.sendData(accessiblePoints, sources, target);
         });
 
         left.add(instructionsPanel);
@@ -154,7 +155,7 @@ public class GUI extends JFrame {
         for (int i = 0; i < y; i++) {
             ArrayList<JButton> buttons = new ArrayList<>();
             for (int j = 0; j < x; j++) {
-                JButton button = new JButton("" + (j+1) + "," + (i+1));
+                JButton button = new JButton("" + (j) + "," + (i));
                 final int yy = j;
                 final int xx = i;
                 button.addMouseListener(new MouseListener() {
@@ -210,11 +211,11 @@ public class GUI extends JFrame {
 
     public void processData(float calcTime, Map<Point, List<Point>> paths) {
         System.out.println("Calculation time: " + calcTime + "s");
-        for (int y = 0; y < buttonList.size(); y++) {
-            ArrayList<JButton> buttons = buttonList.get(y);
-            for (int x = 0; x < buttons.size(); x++) {
-                if ( buttons.get(x).getBackground() == Color.green)
-                buttons.get(x).setBackground(Color.YELLOW);
+        for (Point mapP: sources) {
+            for (Point p: paths.get(mapP)) {
+                JButton  b = buttonList.get(p.x).get(p.y);
+                if(b.getBackground() == Color.green)
+                    b.setBackground(Color.yellow);
             }
         }
         System.out.println(paths);
