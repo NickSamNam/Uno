@@ -3,6 +3,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -13,14 +14,13 @@ import java.util.Map;
  */
 public class Client implements GUI.OnDataSubmissionListener, WindowListener {
     private GUI gui;
-    private Thread dataReceiver;
     private boolean receive = true;
 
     public static void main(String[] args) {
         new Client();
     }
 
-    public final static String HOSTNAME = "server.aftersoft.nl";
+    public final static String HOSTNAME = "localhost";
     public final static int PORT = 8080;
     private Socket socket;
     private ObjectInputStream objectInputStream = null;
@@ -29,18 +29,8 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
 
     public Client() {
         gui = new GUI(this, this);
-        try {
-            socket = new Socket(HOSTNAME, PORT);
-            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            objectInputStream = new ObjectInputStream(socket.getInputStream());
-            dataInputStream = new DataInputStream(socket.getInputStream());
-            System.out.println("\nConnected to: " + socket);
-            (dataReceiver = new Thread(new DataReceiver())).start();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        connect();
+        new Thread(new DataReceiver()).start();
     }
 
     public void sendTest() {
@@ -57,6 +47,20 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
         }
     }
 
+    private void connect() {
+        try {
+            socket = new Socket(HOSTNAME, PORT);
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+            dataInputStream = new DataInputStream(socket.getInputStream());
+            System.out.println("\nConnected to: " + socket);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void sendData(List<Point> accessiblePoints, List<Point> sources, Point target) {
         try {
@@ -65,6 +69,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
             objectOutputStream.writeObject(target);
         } catch (IOException e) {
             e.printStackTrace();
+            connect();
         }
     }
 

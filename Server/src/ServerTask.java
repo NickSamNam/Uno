@@ -50,6 +50,8 @@ public class ServerTask implements Runnable {
                 break;
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 try {
                     objectInputStream.close();
