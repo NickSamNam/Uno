@@ -1,0 +1,18 @@
+diff a/Client/src/GUI.java b/Client/src/GUI.java	(rejected hunks)
+@@ -211,11 +211,11 @@
+ 
+     public void processData(float calcTime, Map<Point, List<Point>> paths) {
+         System.out.println("Calculation time: " + calcTime + "s");
+-        for (int y = 0; y < buttonList.size(); y++) {
+-            ArrayList<JButton> buttons = buttonList.get(y);
+-            for (int x = 0; x < buttons.size(); x++) {
+-                if ( buttons.get(x).getBackground() == Color.green)
+-                buttons.get(x).setBackground(Color.YELLOW);
++        for (Point mapP: sources) {
++            for (Point p: paths.get(mapP)) {
++                JButton  b = buttonList.get(p.x).get(p.y);
++                if(b.getBackground() == Color.green)
++                    b.setBackground(Color.yellow);
+             }
+         }
+         System.out.println(paths);
