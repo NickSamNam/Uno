@@ -9,11 +9,10 @@ import java.util.List;
  */
 public class GUI extends JFrame {
 
-    private JPanel sourcesListPanel, left, grid;
-    private JScrollPane sourcesScrollPane;
-    private ArrayList<Point> sources = new ArrayList<>();
+    private JPanel left, grid;
     private ArrayList<ArrayList<JButton>> buttonList = new ArrayList<>();
-    private TextField XSourcesTF, YSourcesTF;
+    private Point target = null;
+    private JLabel errorMessage = new JLabel();
 
     public GUI(OnDataSubmissionListener submissionListener, WindowListener windowListener) {
         super("Pathfinder");
@@ -32,32 +31,6 @@ public class GUI extends JFrame {
 
         left = new JPanel(new GridLayout(5, 0));
 
-        JPanel targetPanel = new JPanel(new GridLayout(2, 0));
-
-        JLabel targetLabel = new JLabel("Coördinate for the target");
-
-        JPanel targetInput = new JPanel(new GridLayout(3, 2));
-        JLabel XTargetLabel = new JLabel("X = ");
-        TextField XTargetTF = new TextField();
-        JLabel YTargetLabel = new JLabel("Y = ");
-        TextField YTargetTF = new TextField();
-        JLabel targetCoordinatLabel = new JLabel();
-        JButton targetButton = new JButton("Set target");
-        targetButton.addActionListener(e -> {
-            targetCoordinatLabel.setText("X = " + Integer.parseInt(XTargetTF.getText()) + ", Y = " + Integer.parseInt(YTargetTF.getText()));
-            setVisible(true);});
-
-
-        targetInput.add(XTargetLabel);
-        targetInput.add(XTargetTF);
-        targetInput.add(YTargetLabel);
-        targetInput.add(YTargetTF);
-        targetInput.add(targetCoordinatLabel);
-        targetInput.add(targetButton);
-
-        targetPanel.add(targetLabel);
-        targetPanel.add(targetInput);
-        targetPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 
         JPanel gridPanel = new JPanel(new GridLayout(0, 1));
         JLabel gridLabel = new JLabel("size of the grid");
@@ -70,22 +43,54 @@ public class GUI extends JFrame {
         JButton gridButton = new JButton("Set grid size");
         gridButton.addActionListener(e -> {
             content.remove(grid);
+            if(isValid(XGridTF.getText()) && isValid(YGridTF.getText())){
             grid = makeGrid(Integer.parseInt(XGridTF.getText()), Integer.parseInt(YGridTF.getText()));
             content.add(grid, BorderLayout.CENTER);
-            setVisible(true);});
+            setVisible(true);}});
 
         gridInput.add(XGridLabel);
         gridInput.add(XGridTF);
         gridInput.add(YGridLabel);
         gridInput.add(YGridTF);
-        gridInput.add(new JLabel());
+        gridInput.add(errorMessage);
         gridInput.add(gridButton);
 
         gridPanel.add(gridLabel);
         gridPanel.add(gridInput);
         gridPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 
+        JPanel selectionPanel = new JPanel(new GridLayout(3, 2));
 
+        JButton selectAll = new JButton("Select all");
+        selectAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
+            for (JButton b : buttons) {
+                b.setBackground(Color.green);
+            }
+        }});
+        JButton deselectAll = new JButton("Deselect all");
+        deselectAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
+            for (JButton b : buttons) {
+                b.setBackground(null);
+            }
+        }});
+        JButton inverseAll = new JButton("Inverse all");
+        inverseAll.addActionListener(e -> {for (ArrayList<JButton> buttons : buttonList) {
+            for (JButton b : buttons) {
+
+                if(b.getBackground() == Color.green)
+                b.setBackground(null);
+                else if(b.getBackground() != Color.blue && b.getBackground() != Color.red)
+                    b.setBackground(Color.green);
+            }
+        }});
+
+        selectionPanel.add(new JPanel());
+        selectionPanel.add(selectAll);
+        selectionPanel.add(new JPanel());
+        selectionPanel.add(deselectAll);
+        selectionPanel.add(new JPanel());
+        selectionPanel.add(inverseAll);
+        selectionPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 
         JPanel instructionsPanel = new JPanel(new GridLayout(0, 1));
 
@@ -112,7 +117,6 @@ public class GUI extends JFrame {
         submit.addActionListener(e -> {
             ArrayList<Point> accessiblePoints = new ArrayList<>();
             ArrayList<Point> sources = new ArrayList<>();
-            Point target = null;
             for(int y = 0; y < buttonList.size(); y++){
                 for(int x = 0; x < buttonList.get(y).size(); x++){
                     JButton button = buttonList.get(y).get(x);
@@ -123,8 +127,7 @@ public class GUI extends JFrame {
                         sources.add(new Point(x,y));
                     }
                     else if(button.getBackground() == Color.red){
-                        accessiblePoints.add(new Point(x,y));
-                        target = new Point(x,y);
+                            accessiblePoints.add(new Point(x, y));
                     }
                 }
             }
@@ -134,7 +137,7 @@ public class GUI extends JFrame {
         left.add(instructionsPanel);
         left.add(new JPanel());
         left.add(gridPanel);
-        left.add(new JPanel());
+        left.add(selectionPanel);
         left.add(submit);
 
 
@@ -152,6 +155,8 @@ public class GUI extends JFrame {
             ArrayList<JButton> buttons = new ArrayList<>();
             for (int j = 0; j < x; j++) {
                 JButton button = new JButton("" + (j+1) + "," + (i+1));
+                final int yy = j;
+                final int xx = i;
                 button.addMouseListener(new MouseListener() {
                     @Override
                     public void mouseReleased(MouseEvent e) {
@@ -160,7 +165,10 @@ public class GUI extends JFrame {
                         }else if(e.isShiftDown()){
                             button.setBackground(Color.green);
                         }else if(e.getButton() == MouseEvent.BUTTON3){
+                            if(target != null) {
+                                buttonList.get(target.x).get(target.y).setBackground(Color.green);}
                             button.setBackground(Color.red);
+                            target = new Point(xx,yy);
                         }else{ button.setBackground(Color.blue);
                         }
                     }
@@ -202,6 +210,31 @@ public class GUI extends JFrame {
 
     public void processData(float calcTime, Map<Point, List<Point>> paths) {
         System.out.println("Calculation time: " + calcTime + "s");
+        for (int y = 0; y < buttonList.size(); y++) {
+            ArrayList<JButton> buttons = buttonList.get(y);
+            for (int x = 0; x < buttons.size(); x++) {
+                if ( buttons.get(x).getBackground() == Color.green)
+                buttons.get(x).setBackground(Color.YELLOW);
+            }
+        }
         System.out.println(paths);
+    }
+
+    private boolean isValid(String input) {
+        boolean valid = true;
+        try {
+            if (Long.parseLong(input) < 1) {
+                errorMessage.setText("Minimal size of 1 required.");
+                valid = false;
+            } else if (Long.parseLong(input) > Integer.MAX_VALUE) {
+                errorMessage.setText("Maximum width of " + Integer.MAX_VALUE + " allowed.");
+                valid = false;
+            }
+        } catch (NumberFormatException e) {
+            errorMessage.setText("No valid input");
+            valid = false;
+        }
+        setVisible(true);
+        return valid;
     }
 }
