@@ -28,7 +28,13 @@ public class BreadthFirstSearch {
         this.accessiblePoints = accessiblePoints;
         this.target = new Vertex(target);
         visited = new ConcurrentHashMap<>(accessiblePoints.size());
+        System.out.println("Mapping accessible points");
         bfs();
+        System.out.println("Accessible points mapped");
+        if (visited.size() < accessiblePoints.size())
+            System.out.println("Not all points have been visited");
+        else if (visited.size() > accessiblePoints.size())
+            System.out.println("Some points have been visited multiple times");
     }
 
     public List<Point> findPath(Point source) {
@@ -36,23 +42,23 @@ public class BreadthFirstSearch {
     }
 
 
-    /**
-     * @param sources list of sources from which to find the route to the target
-     * @return map with source as key and list of points of route as value
-     */
-    public Map<Point, List<Point>> findPaths(List<Point> sources) {
-        ExecutorService executor = Executors.newFixedThreadPool(sources.size());
-        Map<Point, List<Point>> paths = new ConcurrentHashMap(sources.size());
-        Collections.sort(sources, new PointComparator());
-
-        for (Point source : sources) {
-            executor.execute(new SearchTask(source, paths));
-        }
-
-        while (paths.size() != sources.size());
-        executor.shutdown();
-        return paths;
-    }
+//    /**
+//     * @param sources list of sources from which to find the route to the target
+//     * @return map with source as key and list of points of route as value
+//     */
+//    public Map<Point, List<Point>> findPaths(List<Point> sources) {
+//        ExecutorService executor = Executors.newFixedThreadPool(sources.size());
+//        Map<Point, List<Point>> paths = new ConcurrentHashMap(sources.size());
+//        Collections.sort(sources, new PointComparator());
+//
+//        for (Point source : sources) {
+//            executor.execute(new SearchTask(source, paths));
+//        }
+//
+//        while (paths.size() != sources.size());
+//        executor.shutdown();
+//        return paths;
+//    }
 
     /**
      * @param source point to start at
@@ -60,6 +66,7 @@ public class BreadthFirstSearch {
      * @throws NullPointerException Source not within scope.
      */
     private List<Point> searchShortestPath(@NotNull Point source) throws NullPointerException {
+        System.out.println("Looking for shortest path");
         Vertex src = visited.get(source);
         List<Point> path = new ArrayList<>();
         while (src != target) {
@@ -68,6 +75,11 @@ public class BreadthFirstSearch {
                 break;
             path.add(src.location);
         }
+        int correctSize = Math.abs(source.x-target.location.x) + Math.abs(source.y-target.location.y);
+        if (path.size() != correctSize) {
+            System.out.println("Path incorrect:" + "\tSource: " + source + "\tTarget: " + target + "\tCorrect size: " + correctSize + "\tActual size: " + path.size());
+        } else
+            System.out.println("Shortest path found");
         return path;
     }
 
@@ -212,18 +224,18 @@ public class BreadthFirstSearch {
         }
     }
 
-    private class SearchTask implements Runnable {
-        private Point source;
-        private Map<Point, List<Point>> collector;
-
-        public SearchTask(Point source, Map<Point, List<Point>> collector) {
-            this.source = source;
-            this.collector = collector;
-        }
-
-        @Override
-        public void run() {
-            collector.put(source, searchShortestPath(source));
-        }
-    }
+//    private class SearchTask implements Runnable {
+//        private Point source;
+//        private Map<Point, List<Point>> collector;
+//
+//        public SearchTask(Point source, Map<Point, List<Point>> collector) {
+//            this.source = source;
+//            this.collector = collector;
+//        }
+//
+//        @Override
+//        public void run() {
+//            collector.put(source, searchShortestPath(source));
+//        }
+//    }
 }

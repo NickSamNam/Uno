@@ -142,6 +142,7 @@ public class GUI extends JFrame {
                         }
                     }
                 }
+                System.out.println("\nSubmitting data");
                 submissionListener.sendData(accessiblePoints, sources, target);
             } else {
                 errorMessage.setText("there is no target.");
@@ -225,6 +226,7 @@ public class GUI extends JFrame {
     }
 
     public void processData(float calcTime, Map<Point, List<Point>> paths) {
+        System.out.println("Processing data");
         System.out.println("Calculation time: " + calcTime + "s");
         resetPaths();
         for (Point mapP : sources) {
@@ -235,6 +237,7 @@ public class GUI extends JFrame {
             }
         }
         System.out.println(paths);
+        System.out.println("Data processed");
     }
 
     private boolean isValid(String input) {

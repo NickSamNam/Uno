@@ -63,10 +63,12 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
 
     @Override
     public void sendData(List<Point> accessiblePoints, List<Point> sources, Point target) {
+        System.out.println("Sending data");
         try {
             objectOutputStream.writeObject(accessiblePoints);
             objectOutputStream.writeObject(sources);
             objectOutputStream.writeObject(target);
+            System.out.println("Data sent");
         } catch (IOException e) {
             e.printStackTrace();
             connect();
@@ -125,6 +127,7 @@ public class Client implements GUI.OnDataSubmissionListener, WindowListener {
                 try {
                     float calcTime = dataInputStream.readFloat();
                     Map<Point, List<Point>> paths = (Map<Point, List<Point>>) objectInputStream.readObject();
+                    System.out.println("Data received");
                     gui.processData(calcTime, paths);
                 } catch (EOFException | SocketException e) {
                     break;

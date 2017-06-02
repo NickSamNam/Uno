@@ -19,6 +19,7 @@ public class Server {
     ServerSocket serverSocket;
 
     public Server() {
+        System.out.println("Setting up server");
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Server running: " + serverSocket.toString());
@@ -31,6 +32,7 @@ public class Server {
     }
 
     private void connectClient() {
+        System.out.println("\n\nWaiting for client");
         try {
             Socket socket = serverSocket.accept();
             System.out.println("\nClient connected: " + socket.toString());
